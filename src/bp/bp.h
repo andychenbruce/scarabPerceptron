@@ -181,6 +181,7 @@ typedef enum Bp_Id_enum {
 #define DEF_CBP(CBP_NAME, CBP_CLASS) CBP_CLASS##_BP,
 #include "cbp_table.def"
 #undef DEF_CBP
+  ANDY_BP,
   NUM_BP,
 } Bp_Id;
 

@@ -38,6 +38,7 @@ Bp bp_table [] = {
     { CBP_CLASS ## _BP,    CBP_NAME,   SCARAB_BP_INTF_FUNC(CBP_CLASS, init), SCARAB_BP_INTF_FUNC(CBP_CLASS, timestamp), SCARAB_BP_INTF_FUNC(CBP_CLASS, pred), SCARAB_BP_INTF_FUNC(CBP_CLASS, spec_update), SCARAB_BP_INTF_FUNC(CBP_CLASS, update), SCARAB_BP_INTF_FUNC(CBP_CLASS, retire), SCARAB_BP_INTF_FUNC(CBP_CLASS, recover), SCARAB_BP_INTF_FUNC(CBP_CLASS, full)}, 
 #include "cbp_table.def"
 #undef DEF_CBP
+    { ANDY_BP,      "andy",     bp_andy_init,       bp_andy_timestamp,      bp_andy_pred,     bp_andy_spec_update,      bp_andy_update,      bp_andy_retire,      bp_andy_recover,      bp_andy_full},
     { NUM_BP,       0,          NULL,               NULL,                   NULL,             NULL,                     NULL,                NULL,                NULL,                 NULL }
     
 };
