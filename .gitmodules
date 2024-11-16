@@ -8,3 +8,6 @@
 	path = src/deps/dynamorio
 	url = https://github.com/kofyou/dynamorio.git
 	branch = scarab_dep
+[submodule "infra"]
+	path = infra
+	url = https://github.com/Litz-Lab/Scarab-infra.git
