@@ -68,3 +68,7 @@ test_string_pinball/
 .vscode/*
 *.code-workspace
 .env
+
+# andy
+src/.cache
+compile_commands.json
