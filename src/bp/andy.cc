@@ -41,6 +41,24 @@ class AndyPerceptron {
 
     return y > 0.0;
   }
+
+  void update_incorrect(uns32 history) {
+    bool predicted_bool = this->predict(history);
+    int  predicted;
+    if(predicted_bool) {
+      predicted = 1;
+    } else {
+      predicted = -1;
+    }
+
+
+    this->bias += predicted;
+    for(uns i = 0; i < HIST_LENGTH; i++) {
+      int history_bit = (history & (1 << i)) >> i;
+
+      this->weights[i] += predicted * history_bit;
+    }
+  }
 };
 
 namespace {
@@ -102,6 +120,6 @@ void bp_andy_update(Op* op) {
 
 
   if(op->oracle_info.mispred) {
-    pht_entry->update(hist);
+    pht_entry->update_incorrect(hist);
   }
 }
