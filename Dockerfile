@@ -1,7 +1,7 @@
 FROM ubuntu:20.04
 
 RUN apt update
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -y cmake make git g++ python3 wget zlib1g-dev libsnappy-dev libconfig++-dev
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y cmake make git g++ python3 python3-pip wget zlib1g-dev libsnappy-dev libconfig++-dev
 
 # COPY . /app/
 
@@ -19,6 +19,13 @@ COPY infra/cse220/run_cse220.sh /usr/local/bin
 RUN sed -i '1s/^/#!\/usr\/bin\/env python3\n/' /usr/local/bin/run_exp_using_descriptor.py
 
 COPY andy.sh /root
+
+
+# traces, don't know what
+RUN pip install gdown
+WORKDIR /
+
+RUN gdown https://drive.google.com/uc?id=1Z4ouWgNrkNnezrq7wxk4OXBpRBm-2CzA && tar -xzvf cse220_traces.tar.gz
 
 # WORKDIR /app/src/
 # RUN make
