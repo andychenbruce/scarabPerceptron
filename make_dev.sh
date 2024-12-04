@@ -5,7 +5,7 @@ set -e
 podman run \
        --interactive \
        --detach \
-       --volume "${HOME}/文档/功课/CSE220/scarabPerceptron":"/root/scarab" \
+       --volume "${PWD}":"/root/scarab" \
        --volume "${XDG_CONFIG_HOME}/git":/root/.config/git:ro \
        --volume $(gpgconf --list-dirs agent-extra-socket):/root/.gnupg/S.gpg-agent \
        --volume $(gpgconf --list-dirs agent-ssh-socket):/root/.gnupg/S.gpg-agent.ssh \
