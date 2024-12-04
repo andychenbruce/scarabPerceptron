@@ -39,36 +39,39 @@ class AndyPerceptron {
       }
     }
 
-    return y < 0;
+    return y > 0;
   }
 
   void update_incorrect(uns32 history) {
     bool predicted_bool = this->predict(history);
-    int  predicted;
+    int  correct;
     if(predicted_bool) {
-      predicted = 1;
+      correct = -1;
     } else {
-      predicted = -1;
+      correct = 1;
     }
 
 
-    this->bias += predicted;
+    this->bias += correct;
     for(uns i = 0; i < HIST_LENGTH; i++) {
       int history_bit = (history & (1 << i)) >> i;
 
-      this->weights[i] += predicted * history_bit;
+      if(history_bit == 0){
+	history_bit = -1;
+      }
+      
+      this->weights[i] += correct * history_bit;
     }
   }
 };
 
 namespace {
-struct AndyState {
-  std::vector<AndyPerceptron> pht;
-};
-int   NUM_PERCEPTRONS = 1 << HIST_LENGTH;
-uns32 get_perceptron_index_index(const Addr addr) {
-  return addr % NUM_PERCEPTRONS;
-}
+  struct AndyState {
+    std::vector<AndyPerceptron> pht;
+  };
+  uns32 get_perceptron_index_index(const Addr addr) {
+    return addr % NUM_PERCEPTRONS;
+  }
 }
 
 std::vector<AndyState> andy_state_all_cores;
@@ -98,9 +101,9 @@ uns8 bp_andy_pred(Op* op) {
   const AndyPerceptron pht_entry = gshare_state.pht[index];
 
   if(pht_entry.predict(hist)) {
-    return 1;
+    return TAKEN;
   } else {
-    return 0;
+    return NOT_TAKEN;
   }
 }
 
