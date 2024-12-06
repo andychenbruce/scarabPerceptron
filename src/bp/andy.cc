@@ -2,6 +2,7 @@
   by andy and neon
  */
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <map>
 #include <vector>
@@ -15,28 +16,50 @@ extern "C" {
 #include "statistics.h"
 }
 
-
+const int NUM_INTERMEDIATE = 5;
 class AndyPerceptron {
  private:
-  std::vector<int> weights;
-  int              bias;
+  std::vector<std::vector<float>> first_layer_weights;
+  float                           first_biases[NUM_INTERMEDIATE];
+  float                           second_layer_weights[NUM_INTERMEDIATE];
+  float                           second_bias;
+
 
  public:
-  AndyPerceptron() {
-    this->weights = std::vector<int>(HIST_LENGTH, 1);
-    this->bias    = 0;
+  AndyPerceptron() : first_biases{0} {
+    this->first_layer_weights = std::vector<std::vector<float>>(
+      NUM_INTERMEDIATE, std::vector<float>(HIST_LENGTH, 1.0));
+    second_bias = 0;
+  }
+
+  float sigmoid(float x) const { return 1 / (1 + exp(-x)); }
+
+  void get_middle_layer(uns32 history, float mem[NUM_INTERMEDIATE]) const {
+    for(uns k = 0; k < NUM_INTERMEDIATE; k++) {
+      mem[k] = this->first_biases[k];
+
+      for(uns i = 0; i < HIST_LENGTH; i++) {
+        int history_bit = (history & (1 << i)) >> i;
+
+        if(history_bit == 0) {
+          mem[k] += this->first_layer_weights[k][i] * -1;
+        } else {
+          mem[k] += this->first_layer_weights[k][i] * 1;
+        }
+      }
+    }
+
+    for(uns k = 0; k < NUM_INTERMEDIATE; k++) {
+      mem[k] = sigmoid(mem[k]);
+    }
   }
   bool predict(uns32 history) const {
-    double y = this->bias;
+    float middle_layer[NUM_INTERMEDIATE];
+    get_middle_layer(history, middle_layer);
 
-    for(uns i = 0; i < HIST_LENGTH; i++) {
-      int history_bit = (history & (1 << i)) >> i;
-
-      if(history_bit == 0) {
-        y += this->weights[i] * -1;
-      } else {
-        y += this->weights[i] * 1;
-      }
+    float y = this->second_bias;
+    for(uns i = 0; i < NUM_INTERMEDIATE; i++) {
+      y += this->second_layer_weights[i] * middle_layer[i];
     }
 
     return y > 0;
@@ -51,28 +74,39 @@ class AndyPerceptron {
       correct = 1;
     }
 
+    float middle_layer[NUM_INTERMEDIATE];
+    get_middle_layer(history, middle_layer);
 
-    this->bias += correct;
-    for(uns i = 0; i < HIST_LENGTH; i++) {
-      int history_bit = (history & (1 << i)) >> i;
+    this->second_bias += correct;
+    for(uns i = 0; i < NUM_INTERMEDIATE; i++) {
+      this->second_layer_weights[i] += correct * (middle_layer[i]);
+    }
 
-      if(history_bit == 0){
-	history_bit = -1;
+    for(uns k = 0; k < NUM_INTERMEDIATE; k++) {
+      float deriv = middle_layer[k] * (1.0 - middle_layer[k]);
+      for(uns i = 0; i < HIST_LENGTH; i++) {
+        int   history_bit = (history & (1 << i)) >> i;
+        float dir;
+        if(history_bit == 0) {
+          dir = -1;
+        } else {
+          dir = 1;
+        }
+        this->first_layer_weights[k][i] += correct * (deriv * dir * second_layer_weights[k]);
+	this ->first_biases[i] += correct * deriv * second_layer_weights[k];
       }
-      
-      this->weights[i] += correct * history_bit;
     }
   }
 };
 
 namespace {
-  struct AndyState {
-    std::vector<AndyPerceptron> pht;
-  };
-  uns32 get_perceptron_index_index(const Addr addr) {
-    return addr % NUM_PERCEPTRONS;
-  }
+struct AndyState {
+  std::vector<AndyPerceptron> pht;
+};
+uns32 get_perceptron_index_index(const Addr addr) {
+  return addr % NUM_PERCEPTRONS;
 }
+}  // namespace
 
 std::vector<AndyState> andy_state_all_cores;
 
