@@ -10,7 +10,7 @@ import csv
 import numpy
 from matplotlib import cm
 
-hists = [4, 8, 16, 30]
+hists = [4, 8, 16, 24, 30]
 perceptron_nums = [1, 4, 8, 16, 32, 128, 1024, 32768, 131072]
 
 def read_descriptor_from_json(descriptor_filename):
